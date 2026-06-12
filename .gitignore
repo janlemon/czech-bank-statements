@@ -3,3 +3,6 @@ dist/
 coverage/
 *.log
 .DS_Store
+
+# Local real bank statements — NEVER commit (privacy)
+samples/
