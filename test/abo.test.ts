@@ -82,6 +82,35 @@ describe('ABO/GPC parser', () => {
     expect(res.transactions[0]!.direction).toBe('credit');
   });
 
+  it('parses the J&T Banka variant (explicit +/− sign, 11-digit amount)', () => {
+    const build = (sign: '+' | '-', haleru11: string) => {
+      const a = Array<string>(128).fill(' ');
+      const set = (start: number, s: string) => {
+        for (let i = 0; i < s.length; i++) a[start + i] = s[i]!;
+      };
+      set(0, '075');
+      set(3, '2700866584'.padStart(16, '0'));
+      set(19, '7614519001'.padStart(16, '0'));
+      set(48, sign);
+      set(49, haleru11.padStart(11, '0')); // 11-digit haléře (sign took one char)
+      set(73, '5500');
+      set(97, 'Příchozí úhrada'.padEnd(20, ' '));
+      set(122, '200126');
+      return a.join('');
+    };
+
+    // 1000000 haléře = 10 000,00 CZK
+    const credit = parseAbo(build('+', '1000000'));
+    expect(credit.transactions[0]!.amount).toBe(10000);
+    expect(credit.transactions[0]!.direction).toBe('credit');
+    expect(credit.transactions[0]!.counterpartyAccount).toBe('7614519001/5500');
+
+    // 5372 haléře = 53,72 CZK, outgoing
+    const debit = parseAbo(build('-', '5372'));
+    expect(debit.transactions[0]!.amount).toBe(-53.72);
+    expect(debit.transactions[0]!.direction).toBe('debit');
+  });
+
   it('reports no transactions when there are no 075 records', () => {
     const res = parseAbo('something that is not ABO');
     expect(res.ok).toBe(false);

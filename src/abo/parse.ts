@@ -42,22 +42,36 @@ export function parseAbo(text: string): ParseResult {
     }
 
     if (type === '075') {
-      const abs = haleru(field(line, 48, 12)) ?? 0;
-      const code = line.slice(60, 61);
-      // Signed: credit (+) for incoming / debit reversal, debit (−) for outgoing.
+      // Two layouts share everything except the amount field:
+      //   * Standard/Fio: amount at [48,60), a posting code (1/2/4/5) at [60].
+      //   * J&T variant:  an explicit sign (+/−) at [48], amount at [49,61).
+      // [48] is a digit in the standard layout and a sign in the J&T one, so it
+      // discriminates cleanly. Everything from [61] (VS/KS/SS/bank code/…) is
+      // identical in both.
+      const c48 = line[48];
       let amount: number;
-      switch (code) {
-        case '2': // credit (připsání)
-        case '4': // storno debit → money back in
-          amount = abs;
-          break;
-        case '1': // debit (odepsání)
-        case '5': // storno credit → money back out
-          amount = -abs;
-          break;
-        default:
-          amount = abs;
-          warnings.push(`Neznámý kód účtování "${code}" — částka brána kladně.`);
+      if (c48 === '+' || c48 === '-') {
+        // The sign occupies [48], so the amount is 11 digits at [49,60) — one
+        // shorter than the standard 12-digit [48,60) field. Both layouts thus
+        // end the amount block at [60] and re-align from [61].
+        const abs = haleru(field(line, 49, 11)) ?? 0;
+        amount = c48 === '-' ? -abs : abs;
+      } else {
+        const abs = haleru(field(line, 48, 12)) ?? 0;
+        const code = line.slice(60, 61);
+        switch (code) {
+          case '2': // credit (připsání)
+          case '4': // storno debit → money back in
+            amount = abs;
+            break;
+          case '1': // debit (odepsání)
+          case '5': // storno credit → money back out
+            amount = -abs;
+            break;
+          default:
+            amount = abs;
+            warnings.push(`Neznámý kód účtování "${code}" — částka brána kladně.`);
+        }
       }
 
       const counter = stripZeros(field(line, 19, 16));
