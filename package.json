@@ -1,0 +1,45 @@
+{
+  "name": "czech-bank-statements",
+  "version": "0.1.0",
+  "description": "Parse Czech & Slovak bank statements (CSV, ABO/GPC) into a unified transaction model. Encoding-aware (Windows-1250), variable/constant/specific symbols, automatic column detection.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "czech", "slovak", "bank", "statement", "bankovni-vypis", "csv", "abo", "gpc",
+    "camt", "iso20022", "fio", "kb", "csob", "ceska-sporitelna", "raiffeisen",
+    "moneta", "variabilni-symbol", "transactions", "parser"
+  ],
+  "license": "MIT",
+  "author": "Jan Lemon",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janlemon/czech-bank-statements.git"
+  },
+  "bugs": { "url": "https://github.com/janlemon/czech-bank-statements/issues" },
+  "homepage": "https://github.com/janlemon/czech-bank-statements#readme",
+  "engines": { "node": ">=18" },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
