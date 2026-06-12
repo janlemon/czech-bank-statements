@@ -49,27 +49,33 @@ export function tokenizeCsv(text: string, delimiter: string): string[][] {
   return rows;
 }
 
-function sniffDelimiter(text: string): string {
-  const sample = text.split(/\r?\n/).filter((l) => l.trim()).slice(0, 8).join('\n');
-  const candidates = [';', ',', '\t', '|'];
-  let best = ';';
-  let bestCount = -1;
-  for (const d of candidates) {
-    const count = sample.split(d).length - 1;
-    if (count > bestCount) {
-      bestCount = count;
-      best = d;
+const CSV_DELIMITERS = [';', ',', '\t', '|'];
+
+/**
+ * Parse CSV, trying each likely delimiter and keeping the one that actually
+ * yields a recognisable table (header with date + amount, most transactions).
+ * Robust against metadata header blocks — e.g. Fio prepends account/period/
+ * balance lines whose stray commas would fool a naive frequency sniff.
+ */
+export function parseCsv(text: string, delimiterOverride?: string): ParseResult {
+  if (delimiterOverride) return parseCsvWith(text, delimiterOverride);
+
+  let best: ParseResult | null = null;
+  let fallback: ParseResult | null = null;
+  for (const delimiter of CSV_DELIMITERS) {
+    const r = parseCsvWith(text, delimiter);
+    fallback ??= r;
+    if (r.ok && (best === null || r.transactions.length > best.transactions.length)) {
+      best = r;
     }
   }
-  return best;
+  return best ?? fallback!;
 }
 
-export function parseCsv(text: string, delimiterOverride?: string): ParseResult {
+function parseCsvWith(text: string, delimiter: string): ParseResult {
   const warnings: string[] = [];
   const errors: string[] = [];
   const meta: StatementMeta = {};
-
-  const delimiter = delimiterOverride ?? sniffDelimiter(text);
   const rows = tokenizeCsv(text, delimiter).filter((r) => r.some((c) => c.trim() !== ''));
 
   if (rows.length === 0) {

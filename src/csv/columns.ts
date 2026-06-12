@@ -32,7 +32,7 @@ const FIELD_PATTERNS: [Field, string[]][] = [
   ['counterName', ['nazev protiuctu', 'nazev protistrany', 'protistrana', 'prijemce', 'platce', 'nazev uctu', 'nazev', 'name']],
   ['balance', ['zustatek po transakci', 'zustatek', 'balance']],
   ['currency', ['mena', 'currency']],
-  ['transactionId', ['id pohybu', 'id transakce', 'cislo pohybu', 'cislo transakce', 'identifikator transakce', 'reference platby', 'reference']],
+  ['transactionId', ['id operace', 'id pohybu', 'id transakce', 'cislo pohybu', 'cislo transakce', 'identifikator transakce', 'reference platby', 'reference']],
   ['direction', ['typ pohybu', 'typ transakce', 'smer', 'debet/kredit', 'debet kredit']],
   ['date', ['datum zauctovani', 'datum provedeni', 'datum transakce', 'datum odepsani', 'datum zpracovani', 'datum splatnosti', 'datum', 'date']],
   ['debit', ['vydaj', 'na vrub', 'debet', 'odepsano', 'odchozi']],
